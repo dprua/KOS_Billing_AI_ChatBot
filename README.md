@@ -1,6 +1,7 @@
 # KT 빌링 과제 분석 챗봇
 
 📋 KT 빌링 시스템 관련 과제 분석 및 유사 프로젝트 검색을 위한 RAG(Retrieval-Augmented Generation) 기반 챗봇
+([링크](https://dprua-webapp-001-cagqaphrgtamg2fv.canadacentral-01.azurewebsites.net/)) 
 
 ## 📖 프로젝트 개요
 
