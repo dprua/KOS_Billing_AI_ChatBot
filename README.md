@@ -52,7 +52,7 @@ KT 빌링 과제 분석 챗봇은 신규 개발 요구사항을 분석하고, �
 ### AI/ML
 - **OpenAI GPT-4o-mini** - 텍스트 생성 및 분석
 - **Text-Embedding-3-Small** - 텍스트 임베딩
-- **tiktoken** - 토큰 계산
+- **tiktoken** - 토큰 계산 - 정확한 청크 분할 : 문서를 임베딩하기 전에 텍스트를 일정한 토큰 길이(1000토큰)로 나누기 위해
 
 ### Azure Services
 - **Azure OpenAI Service**
