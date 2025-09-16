@@ -105,16 +105,15 @@ pip install -r requirements.txt
 ### 4. 로컬 실행
 
 ```bash
-streamlit run test.py
+python -m streamlit run test.py
 ```
 
 ## 🚀 Azure Web App 배포
 
 ### 1. 배포 스크립트 실행
-
+Azure Portal -> Web App -> 구성 -> 시작 명령어 세팅
 ```bash
-chmod +x streamlit.sh
-./streamlit.sh
+bash /home/site/wwwroot/streamlit.sh
 ```
 
 ### 2. Azure Web App 설정
