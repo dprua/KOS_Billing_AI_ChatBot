@@ -1,0 +1,50 @@
+프로젝트명: [DR-2025-32048 지니TV 신규상품 출시 개발 요청 건]
+담당부서: [개발팀]
+프로젝트 유형: [빌링 시스템]
+기술스택: [Java]
+개발기간: [2025년 09월 정기배포]
+담당자: [박예겸]
+## 개발 요구사항
+- 과제진행배경
+    1. 상품 합리화를 위한 지니TV 통합상품 2종 개발
+- 구체적인 기능 요구사항
+    1. 신규 IPTV 상품 2종 개발
+        - 상품1 스펙
+            - 상품명 : 지니TV 모든G
+            - 상품아이디 : QPIV01
+            - 월정액 : 24,300원 (부가세 제외)
+                - 기본료 : 15,000원 (부가세 제외)
+                - 콘텐츠1료 : 9,300원 (부가세 제외)
+            - 청구방식 : 일할청구
+        - 상품2 스펙
+            - 상품명 : 지니TV 디즈니+ 모든G
+            - 상품아이디 : QPIW01
+            - 월정액 : 33,300원 (부가세 제외)
+                - 기본료 : 15,000원 (부가세 제외)
+                - 콘텐츠1료 : 9,300원 (부가세 제외)
+                - 콘텐츠2료 : 9,000원 (부가세 제외)
+            - 청구방식 : 일할청구
+        - 각 상품 요금별 단위서비스 / 청구항목 분리 개발 필요
+        - 각 요금별 계약기간할인 1,2,3년 개발 필요
+        - 각 요금별 결합할인 1,2,3년 개발 필요
+    2. 신규 IPTV 상품 추가로 인한 기타배치 레퍼런스 추가
+        - MRSS(미디어정산) 미디어콘텐츠 정산시스템 자료 생성 배치 레퍼런스 추가
+            - 배치명 : MediaContsSetlCretJO
+            - 테이블 : BL_BILL_RFRN_CD
+                - BILL_RFRN_UP_VAL = 'MediaContsSetlCretJO'
+                - BILL_RFRN_LOW_VAL = 'PROD'
+        - CtonSlngTxnJO 배치 레퍼런스 추가
+            - 배치명 : CtonSlngTxnJO
+            - 테이블 : BL_BILL_RFRN_CD
+                - BILL_RFRN_UP_VAL = 'CtonSlngTxnJO'
+                - BILL_RFRN_LOW_VAL = 'UNIT_SVC_ID'
+    3. 상품 레퍼런스 정상 등록 체크
+        - PR_PROD_BAS
+        - PR_PROD_UNIT_SVC_REL
+        - PR_FMAT_TARIF_DTL
+    4. 청구 레퍼런스 정상 등록 체크
+        - BL_BILL_ITEM_BAS
+        - BL_CHAGE_ITEM_DTL
+    5. 할인 레퍼런스 정상 등록 체크
+        - PR_DC_BAS
+        - PR_DC_DTL

@@ -1,0 +1,271 @@
+﻿filename,content,project_type,technology,department
+DR-2024-09838 SPOTV PRIME NOW 신규 상품 개발의 건,"프로젝트명: [DR-2024-09838 SPOTV PRIME NOW 신규 상품 개발의 건]
+담당부서: [개발팀]
+프로젝트 유형: [빌링 시스템]
+기술스택: [Java,SQL]
+개발기간: [2024년 09월 정기배포]
+담당자: [박예겸]
+## 개발 요구사항
+- 과제진행배경
+    1. 기존 유선 OTT 서비스에 SPOTV PRIME NOW 상품 추가
+        - 기존 유선 OTT 서비스 : 디즈니+, 티빙
+- 구체적인 기능 요구사항
+    1. 신규 유선 OTT 상품 출시로 인한 월정액 로직 수정 개발
+        - CretSvcContInstBO.cretSvcContInstBySb()
+            1. tbAcSpotvTrmnHstBo - 신규 테이블 BO개발
+                - SvcContInst 생성 시, 신규 SPOTV 테이블이력을 기존 유선 OTT 공통 List에 ADD 할 수 있도록 로직 개발
+                - tbAcSpotvTrmnHstBo.retvAcSpotvTrmnHst() SPOTV 해지이력 조회 메소드 개발
+            2. AcSpotvTrmnHstRetvDO - 신규 테이블 DO 개발
+                - 신규 SPOTV 테이블에서 해당 서비스계약의 이력을 조회할 수 있는 RetvDO 개발
+                - 파람정보 : svcContId, billStDate, billFnsDate
+            3. svcContInst.getAcWrlinDisnTrmnHstList()에서 관리중인 기존 디즈니+, 티빙 해지이력 에 SPOTV 해지이력도 ADD 되도록 구현
+                - SPOTV 해지유형
+                    - S01 : 서비스계약해지
+                    - S02 : 상품해지
+                    - S03 : 정지
+                    - S05 : 정지해지(취소)
+        - RcMonthContlBO.deleteRcForDisneyPlusWrlin()
+            1. SPOTV 로직 추가
+                - 신규 DTO 추가 : AcSpotvTrmHstDTO
+                    -SPOTV 대상 처리 시, 디즈니+ / 티빙과 분리처리 될 수 있도록 SPOTV DTO 생성
+                - SPOTV 상품 레퍼런스 설정
+                    - 테이블명 : PR_FAMT_TARIF_DTL
+                    - 컬럼 및 세팅 값 : ASBYDAY_CALC_DIV_CD = 'OTTW'
+                - SPOTV 상품 플래그 DataDef.java 상수 선언
+                    - PFTD_ACDC_SPOTV_OTT_W = 'S'
+                    - 7일이내 상품해지 및 시청이력존재 케이스 처리 시, 티빙과 별도로 SPOTV 대상 정상청구하기 위해 별도 SPOTV 플래그 개발
+                - SPOTV 상품해지 별도로직 개발
+                    - SPOTV 상품의 경우 유효한 시청이력이 존재할 경우 전부 월청구 대상으로 해당 로직 추가필요
+
+    2. 신규 유선 OTT 상품 출시로 인한 조정배치 로직 수정 개발
+        - MfamtProdAdjTgtCretBO.DisneyAdjTgtWireTxnCret() 
+            - SPOTV 로직 추가
+            - SPOTV 회선해지(S01) 대상은 티빙과 동일하게 처리
+            - SPOTV 상품해지(S02) 대상은 시청이력 존재하는 대상 로직 추가
+                1. SPOTV 상품해지(S02) + 유효한시청이력존재 = 조정 미대상 판단하도록 조건문 추가
+            - SPOTV 8일이후 상품해지(S02) 및 시청이력 미존재 대상 로직 추가
+                1. SPOTV 8일이후 상품해지(S02) + 시청이력미존재 할 경우 조정 미대상으로 판단하도록 조건문 추가
+        - MfamtProdAdjTgtWireRetvDO
+            - SPOTV 로직 추가
+            - SPOTV 대상 추출하기 위해 로직 수정
+            - SPOTV 구분 값 빌링레퍼런스 추가
+    3. 신규 IPTV 상품 추가로 인한 기타배치 레퍼런스 추가
+        - 요금계산내역에 생성된 TV부가 상품의 청구금액 / 할인금액을 단위서비스아디디 단위로 PVS 시스템으로 전송
+        - MRSS(미디어정산) 미디어콘텐츠 정산시스템 자료 생성 배치 레퍼런스 추가
+            - 배치명 : MediaContsSetlCretJO
+            - 테이블 : BL_BILL_RFRN_CD
+                - BILL_RFRN_UP_VAL = 'MediaContsSetlCretJO'
+                - BILL_RFRN_LOW_VAL = 'PROD'
+        - CtonSlngTxnJO 배치 레퍼런스 추가
+            - 배치명 : CtonSlngTxnJO
+            - 테이블 : BL_BILL_RFRN_CD
+                - BILL_RFRN_UP_VAL = 'CtonSlngTxnJO'
+                - BILL_RFRN_LOW_VAL = 'UNIT_SVC_ID'
+    4. 상품 레퍼런스 정상 등록 체크
+        - PR_PROD_BAS
+        - PR_PROD_UNIT_SVC_REL
+        - PR_FMAT_TARIF_DTL
+    5. 청구 레퍼런스 정상 등록 체크
+        - BL_BILL_ITEM_BAS
+        - BL_CHAGE_ITEM_DTL",빌링 시스템,"Java,SQL",개발팀
+DR-2025-06126 [MVNO] 니오코리아 스타터 10 / 15GB+ 밀링의서재 번들 요금제 2종 개발,"프로젝트명: [DR-2025-06126 [MVNO] 니오코리아 스타터 10 / 15GB+ 밀링의서재 번들 요금제 2종 개발]
+담당부서: [개발팀]
+프로젝트 유형: [빌링 시스템]
+기술스택: [SQL]
+개발기간: [2025년 03월 정기배포]
+담당자: [박예겸]
+## 개발 요구사항
+- 과제진행배경
+    1. 신규 MVNO 요금제 출시를 위한 요금제 개발
+- 구체적인 기능 요구사항
+    1. 신규 MVNO 요금제 2종 개발
+        - 상품1 스펙
+            - 상품명 : 니오코리아 스타터 10GB 밀리의 서재
+            - 상품아이디 : PL251N385
+            - 월정액 : 50,000원 (부가세 제외)
+            - 일시정지요금 : 3,500원(부가세 제외)
+            - 청구방식 : 일할청구
+            - LTE 요금제
+        - 상품2 스펙
+            - 상품명 : 니오코리아 스타터 15GB 밀리의 서재
+            - 상품아이디 : PL251N386
+            - 월정액 : 55,000원 (부가세 제외)
+            - 일시정지요금 : 3,500원(부가세 제외)
+            - 청구방식 : 일할청구
+            - LTE 요금제
+        - 무선 LTE 요금제의 경우, 단위서비스ID KTF2KT 공용으로 사용
+        - 무선 5G 요금제의 경우, 단위서비스ID 5GIND 공용으로 사용
+        - 할인 없음
+    2. 상품 레퍼런스 정상 등록 체크
+        - PR_PROD_BAS
+        - PR_PROD_UNIT_SVC_REL
+        - PR_FMAT_TARIF_DTL",빌링 시스템,SQL,개발팀
+DR-2025-06322 OTT 상품 환불처리 재작업 프로세스 신설,"프로젝트명: [DR-2025-06322 OTT 상품 환불처리 재작업 프로세스 신설]
+담당부서: [개발팀]
+프로젝트 유형: [빌링 시스템]
+기술스택: [Java,SQL]
+개발기간: [2025년 03월 정기배포]
+담당자: [박예겸]
+## 개발 요구사항
+- 과제진행배경
+    1. 기존 유선 OTT 조정배치의 경우 bulk로 처리되어 특정 대상에서 오류 발생 시, 중간에 배치 Exception이 떨어져 처음부터 다시 돌려야 되는 문제가 있었음.(Normal 배치)
+    2. 해당 문제를 개선하고자 건바이건으로 수행될 수 있도록 구조개선 진행(ET배치)
+        - 신규 OTT 조정배치 개발 
+            - AS-IS : MfamtProdAdjTgtCretJO
+            - TO-BE : OttProdAdjTgtCretJO
+- 구체적인 기능 요구사항
+    1. 신규 OTT 조정배치 기능 개발
+        - OttProdAdjTgtCretJO
+            - 작업구분코드
+                - 01 : 대상추출 및 조정대상테이블 인서트
+                - 02 : 조정대상 작업수행 및 최종테이블 인서트
+                - 03 : MVNO 나형사업자 조정처리내역 파일 생성
+                - ALL : 01 ~ 03 작업 수행
+                - C : 작업 취소
+            - 상품구분코드
+                - 901 : 무선
+                - 903 : 유선
+                - ALL : 유/무선 작업 수행
+                - TGT : 입력받은 작업일련번호 대상 작업 수행
+            - 작업일련번호
+                - JOB_WRK_SEQ : 상품구분코드 TGT로 수행 시, Integer값 입력
+        - 조정대상추출 기능BO 개발
+            - MfamtProdAdjTgtCretRegBO(월정액상품조정대상생성등록BO)
+                - 배치 파라미터
+                    - 작업구분코드 : 01, 02, 03, ALL, C
+                    - 상품구분코드 : 901(무선), 903(유선), ALL, TGT
+                    - 청구년월 : YYYYMM
+                - 파라미터 가공
+                    - 청구년월의 경우 조정금액이 발생하는 년월로 202501 인 경우 202412 청구분에서 조정대상 추출진행되므로 청구년월 - 1개월 가공
+                - 대상 추출 및 조정대상 테이블 인서트
+                    - 대상 추출
+                        - 대상 추출DO : MfamtProdAdjTgtCretRetvDO
+                        - 무선대상 추출 방법
+                            - BL_BILL_RFRN_CD에 플래그 M / Y 값으로 지정된 상품 중, 청구분 존재하면서 당월 해지된 대상
+                        - 유선대상 추출 방법
+                            - BL_BILL_RFRN_CD에 플래서 WD, WT, WS 값으로 지정된 상품 중, 청구분 존재하면서 각 해지원부테이블에 이력 존재하는 대상
+                            - 디즈니+ : AC_WRLIN_DISN_TRMN_HST
+                            - 티빙 : AC_WRLIN_TVNG_TRMN_HST
+                            - SPOTV : AC_SPOTV_TRMN_HST
+                    - 조정대상 테이블 인서트
+                        - 대상 테이블 : BL_OTT_PROD_ADJ_TGT
+                        - InsertDO : BlOttProdAdjTgtRegDO
+                        - 해당 테이블 매 작업 시, TRUNCATE 후 INSERT 됨.
+                        - 인서트 컬럼
+                            - SVC_CONT_ID
+                            - BILL_TGT_YM
+                            - CHAGE_CALC_SEQ
+                            - JOB_WRK_STTUS_CD : EX / JS / JF
+                            - OTT_DIV_CD
+                            - SVC_CONT_DIV_CD
+                            - JOB_WRK_SEQ
+                        - 유/무선 통합 조정대상 추출 DO에서 추출된 대상은 위 테이블에 INSERT됨.
+                        - 해당 테이블에 INSERT 된 대상은 다음 작업인 조정대상 작업수행 작업인 ExtractBO에서 추출되어 각각 대상별로 조정작업 수행됨.
+                        - 대상별로 작업 수행되기 위해 JOB_WRK_STTUS_CD 값이 관리되며, OTT_DIV_CD 및 SVC_CONT_DIV_CD 값도 TransformBO에서 로직 분기를 위해 관리된다.
+                - 작업취소
+                    - 결과 테이블 취소 처리
+                        - PY_ETC_ADJ_TRT_TXN : Insert된 row들 TRT_STTUS_CD = 'C' 로 업데이트 처리
+                        - BL_FUTUR_BLL_TGT_YXN / BL_MVNO_ETC_ADJ_TXN : Insert된 row들 DELETE 처리
+        - 조정대상 작업수행 기능BO 개발
+            - MfamtProdAdjTgtCretExtractBO(월정액 조정대상 생성 ExtractBO)
+                - ET 작업대상 추출 및 Trasnfrom으로 대상 전달
+                    - BlOttProdAdjTgtRetvDO(월정액상품조정대상생성조회DO)
+                    - 기능 : BL_OTT_PROD_ADJ_TGT(OTT 상품조정대상).JOB_WRK_STTUS_CD 값이 'EX', 'JF'인 대상 추출
+            - MfamtProdAdjTgtCretTrasnformBO(월정액 조정대상 생성 TrasnformBO)
+                - 각 유/무선 대상은 OTT_DIV_CD / SVC_CONT_DIV_CD 별로 로직 분기처리하여 수행
+                - 각 분기 시, 메소드 파라미터는 BL_OTT_ROD_ADJ_TGT(OTT 상품조정대상) 컬럼을 파라미터로 세팅
+                    - SVC_CONT_ID, CHAGE_CALC_SEQ, BILL_TGT_YM
+                - 각 분기별 상세 로직은 MfamtPRodAdjTgtCretAPBO()에서 수행됨.
+        - 신규 JO 배치 쉘 파일 생성
+            - jflow에서 실행을 위한 쉘파일 개발
+            - 쉘파일 목록
+                - OttProdAdjTgtCretJO_start.sh
+                - OttProdAdjTgtCretJO_start.sh.PRDB
+                - OttProdAdjTgtCretJO_start.sh.SIT
+                - OttProdAdjTgtCretJO_stop.sh
+                - OttProdAdjTgtCretJO_stop.sh.PRDB
+                - OttProdAdjTgtCretJO_stop.sh.SIT
+
+                ",빌링 시스템,"Java,SQL",개발팀
+DR-2025-06891 [MVNO] 엠모바일 요금제 2건 개발 요청,"프로젝트명: [DR-2025-06891 [MVNO] 엠모바일 요금제 2건 개발 요청]
+담당부서: [개발팀]
+프로젝트 유형: [빌링 시스템]
+기술스택: [SQL]
+개발기간: [2025년 01월 정기배포]
+담당자: [박예겸]
+## 개발 요구사항
+- 과제진행배경
+    1. 신규 MVNO 요금제 출시를 위한 요금제 개발
+- 구체적인 기능 요구사항
+    1. 신규 MVNO 요금제 2종 개발
+        - 상품1 스펙
+            - 상품명 : 엠모바일 10GB 밀리의 서재
+            - 상품아이디 : PL251N387
+            - 월정액 : 20,000원 (부가세 제외)
+            - 일시정지요금 : 3,500원(부가세 제외)
+            - 청구방식 : 일할청구
+            - 5G 요금제
+        - 상품2 스펙
+            - 상품명 : 엠모바일 15GB 밀리의 서재
+            - 상품아이디 : PL251N388
+            - 월정액 : 25,000원 (부가세 제외)
+            - 일시정지요금 : 3,500원(부가세 제외)
+            - 청구방식 : 일할청구
+            - 5G 요금제
+        - 무선 LTE 요금제의 경우, 단위서비스ID KTF2KT 공용으로 사용
+        - 무선 5G 요금제의 경우, 단위서비스ID 5GIND 공용으로 사용
+        - 할인 없음
+    2. 상품 레퍼런스 정상 등록 체크
+        - PR_PROD_BAS
+        - PR_PROD_UNIT_SVC_REL
+        - PR_FMAT_TARIF_DTL",빌링 시스템,SQL,개발팀
+DR-2025-32048 지니TV 신규상품 출시 개발 요청 건,"프로젝트명: [DR-2025-32048 지니TV 신규상품 출시 개발 요청 건]
+담당부서: [개발팀]
+프로젝트 유형: [빌링 시스템]
+기술스택: [Java]
+개발기간: [2025년 09월 정기배포]
+담당자: [박예겸]
+## 개발 요구사항
+- 과제진행배경
+    1. 상품 합리화를 위한 지니TV 통합상품 2종 개발
+- 구체적인 기능 요구사항
+    1. 신규 IPTV 상품 2종 개발
+        - 상품1 스펙
+            - 상품명 : 지니TV 모든G
+            - 상품아이디 : QPIV01
+            - 월정액 : 24,300원 (부가세 제외)
+                - 기본료 : 15,000원 (부가세 제외)
+                - 콘텐츠1료 : 9,300원 (부가세 제외)
+            - 청구방식 : 일할청구
+        - 상품2 스펙
+            - 상품명 : 지니TV 디즈니+ 모든G
+            - 상품아이디 : QPIW01
+            - 월정액 : 33,300원 (부가세 제외)
+                - 기본료 : 15,000원 (부가세 제외)
+                - 콘텐츠1료 : 9,300원 (부가세 제외)
+                - 콘텐츠2료 : 9,000원 (부가세 제외)
+            - 청구방식 : 일할청구
+        - 각 상품 요금별 단위서비스 / 청구항목 분리 개발 필요
+        - 각 요금별 계약기간할인 1,2,3년 개발 필요
+        - 각 요금별 결합할인 1,2,3년 개발 필요
+    2. 신규 IPTV 상품 추가로 인한 기타배치 레퍼런스 추가
+        - MRSS(미디어정산) 미디어콘텐츠 정산시스템 자료 생성 배치 레퍼런스 추가
+            - 배치명 : MediaContsSetlCretJO
+            - 테이블 : BL_BILL_RFRN_CD
+                - BILL_RFRN_UP_VAL = 'MediaContsSetlCretJO'
+                - BILL_RFRN_LOW_VAL = 'PROD'
+        - CtonSlngTxnJO 배치 레퍼런스 추가
+            - 배치명 : CtonSlngTxnJO
+            - 테이블 : BL_BILL_RFRN_CD
+                - BILL_RFRN_UP_VAL = 'CtonSlngTxnJO'
+                - BILL_RFRN_LOW_VAL = 'UNIT_SVC_ID'
+    3. 상품 레퍼런스 정상 등록 체크
+        - PR_PROD_BAS
+        - PR_PROD_UNIT_SVC_REL
+        - PR_FMAT_TARIF_DTL
+    4. 청구 레퍼런스 정상 등록 체크
+        - BL_BILL_ITEM_BAS
+        - BL_CHAGE_ITEM_DTL
+    5. 할인 레퍼런스 정상 등록 체크
+        - PR_DC_BAS
+        - PR_DC_DTL",빌링 시스템,"Java,SQL",개발팀

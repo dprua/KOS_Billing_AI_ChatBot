@@ -1,0 +1,69 @@
+프로젝트명: [DR-2024-09838 SPOTV PRIME NOW 신규 상품 개발의 건]
+담당부서: [개발팀]
+프로젝트 유형: [빌링 시스템]
+기술스택: [Java,SQL]
+개발기간: [2024년 09월 정기배포]
+담당자: [박예겸]
+## 개발 요구사항
+- 과제진행배경
+    1. 기존 유선 OTT 서비스에 SPOTV PRIME NOW 상품 추가
+        - 기존 유선 OTT 서비스 : 디즈니+, 티빙
+- 구체적인 기능 요구사항
+    1. 신규 유선 OTT 상품 출시로 인한 월정액 로직 수정 개발
+        - CretSvcContInstBO.cretSvcContInstBySb()
+            1. tbAcSpotvTrmnHstBo - 신규 테이블 BO개발
+                - SvcContInst 생성 시, 신규 SPOTV 테이블이력을 기존 유선 OTT 공통 List에 ADD 할 수 있도록 로직 개발
+                - tbAcSpotvTrmnHstBo.retvAcSpotvTrmnHst() SPOTV 해지이력 조회 메소드 개발
+            2. AcSpotvTrmnHstRetvDO - 신규 테이블 DO 개발
+                - 신규 SPOTV 테이블에서 해당 서비스계약의 이력을 조회할 수 있는 RetvDO 개발
+                - 파람정보 : svcContId, billStDate, billFnsDate
+            3. svcContInst.getAcWrlinDisnTrmnHstList()에서 관리중인 기존 디즈니+, 티빙 해지이력 에 SPOTV 해지이력도 ADD 되도록 구현
+                - SPOTV 해지유형
+                    - S01 : 서비스계약해지
+                    - S02 : 상품해지
+                    - S03 : 정지
+                    - S05 : 정지해지(취소)
+        - RcMonthContlBO.deleteRcForDisneyPlusWrlin()
+            1. SPOTV 로직 추가
+                - 신규 DTO 추가 : AcSpotvTrmHstDTO
+                    -SPOTV 대상 처리 시, 디즈니+ / 티빙과 분리처리 될 수 있도록 SPOTV DTO 생성
+                - SPOTV 상품 레퍼런스 설정
+                    - 테이블명 : PR_FAMT_TARIF_DTL
+                    - 컬럼 및 세팅 값 : ASBYDAY_CALC_DIV_CD = 'OTTW'
+                - SPOTV 상품 플래그 DataDef.java 상수 선언
+                    - PFTD_ACDC_SPOTV_OTT_W = 'S'
+                    - 7일이내 상품해지 및 시청이력존재 케이스 처리 시, 티빙과 별도로 SPOTV 대상 정상청구하기 위해 별도 SPOTV 플래그 개발
+                - SPOTV 상품해지 별도로직 개발
+                    - SPOTV 상품의 경우 유효한 시청이력이 존재할 경우 전부 월청구 대상으로 해당 로직 추가필요
+
+    2. 신규 유선 OTT 상품 출시로 인한 조정배치 로직 수정 개발
+        - MfamtProdAdjTgtCretBO.DisneyAdjTgtWireTxnCret() 
+            - SPOTV 로직 추가
+            - SPOTV 회선해지(S01) 대상은 티빙과 동일하게 처리
+            - SPOTV 상품해지(S02) 대상은 시청이력 존재하는 대상 로직 추가
+                1. SPOTV 상품해지(S02) + 유효한시청이력존재 = 조정 미대상 판단하도록 조건문 추가
+            - SPOTV 8일이후 상품해지(S02) 및 시청이력 미존재 대상 로직 추가
+                1. SPOTV 8일이후 상품해지(S02) + 시청이력미존재 할 경우 조정 미대상으로 판단하도록 조건문 추가
+        - MfamtProdAdjTgtWireRetvDO
+            - SPOTV 로직 추가
+            - SPOTV 대상 추출하기 위해 로직 수정
+            - SPOTV 구분 값 빌링레퍼런스 추가
+    3. 신규 IPTV 상품 추가로 인한 기타배치 레퍼런스 추가
+        - 요금계산내역에 생성된 TV부가 상품의 청구금액 / 할인금액을 단위서비스아디디 단위로 PVS 시스템으로 전송
+        - MRSS(미디어정산) 미디어콘텐츠 정산시스템 자료 생성 배치 레퍼런스 추가
+            - 배치명 : MediaContsSetlCretJO
+            - 테이블 : BL_BILL_RFRN_CD
+                - BILL_RFRN_UP_VAL = 'MediaContsSetlCretJO'
+                - BILL_RFRN_LOW_VAL = 'PROD'
+        - CtonSlngTxnJO 배치 레퍼런스 추가
+            - 배치명 : CtonSlngTxnJO
+            - 테이블 : BL_BILL_RFRN_CD
+                - BILL_RFRN_UP_VAL = 'CtonSlngTxnJO'
+                - BILL_RFRN_LOW_VAL = 'UNIT_SVC_ID'
+    4. 상품 레퍼런스 정상 등록 체크
+        - PR_PROD_BAS
+        - PR_PROD_UNIT_SVC_REL
+        - PR_FMAT_TARIF_DTL
+    5. 청구 레퍼런스 정상 등록 체크
+        - BL_BILL_ITEM_BAS
+        - BL_CHAGE_ITEM_DTL

@@ -1,0 +1,87 @@
+프로젝트명: [DR-2025-06322 OTT 상품 환불처리 재작업 프로세스 신설]
+담당부서: [개발팀]
+프로젝트 유형: [빌링 시스템]
+기술스택: [Java,SQL]
+개발기간: [2025년 03월 정기배포]
+담당자: [박예겸]
+## 개발 요구사항
+- 과제진행배경
+    1. 기존 유선 OTT 조정배치의 경우 bulk로 처리되어 특정 대상에서 오류 발생 시, 중간에 배치 Exception이 떨어져 처음부터 다시 돌려야 되는 문제가 있었음.(Normal 배치)
+    2. 해당 문제를 개선하고자 건바이건으로 수행될 수 있도록 구조개선 진행(ET배치)
+        - 신규 OTT 조정배치 개발 
+            - AS-IS : MfamtProdAdjTgtCretJO
+            - TO-BE : OttProdAdjTgtCretJO
+- 구체적인 기능 요구사항
+    1. 신규 OTT 조정배치 기능 개발
+        - OttProdAdjTgtCretJO
+            - 작업구분코드
+                - 01 : 대상추출 및 조정대상테이블 인서트
+                - 02 : 조정대상 작업수행 및 최종테이블 인서트
+                - 03 : MVNO 나형사업자 조정처리내역 파일 생성
+                - ALL : 01 ~ 03 작업 수행
+                - C : 작업 취소
+            - 상품구분코드
+                - 901 : 무선
+                - 903 : 유선
+                - ALL : 유/무선 작업 수행
+                - TGT : 입력받은 작업일련번호 대상 작업 수행
+            - 작업일련번호
+                - JOB_WRK_SEQ : 상품구분코드 TGT로 수행 시, Integer값 입력
+        - 조정대상추출 기능BO 개발
+            - MfamtProdAdjTgtCretRegBO(월정액상품조정대상생성등록BO)
+                - 배치 파라미터
+                    - 작업구분코드 : 01, 02, 03, ALL, C
+                    - 상품구분코드 : 901(무선), 903(유선), ALL, TGT
+                    - 청구년월 : YYYYMM
+                - 파라미터 가공
+                    - 청구년월의 경우 조정금액이 발생하는 년월로 202501 인 경우 202412 청구분에서 조정대상 추출진행되므로 청구년월 - 1개월 가공
+                - 대상 추출 및 조정대상 테이블 인서트
+                    - 대상 추출
+                        - 대상 추출DO : MfamtProdAdjTgtCretRetvDO
+                        - 무선대상 추출 방법
+                            - BL_BILL_RFRN_CD에 플래그 M / Y 값으로 지정된 상품 중, 청구분 존재하면서 당월 해지된 대상
+                        - 유선대상 추출 방법
+                            - BL_BILL_RFRN_CD에 플래서 WD, WT, WS 값으로 지정된 상품 중, 청구분 존재하면서 각 해지원부테이블에 이력 존재하는 대상
+                            - 디즈니+ : AC_WRLIN_DISN_TRMN_HST
+                            - 티빙 : AC_WRLIN_TVNG_TRMN_HST
+                            - SPOTV : AC_SPOTV_TRMN_HST
+                    - 조정대상 테이블 인서트
+                        - 대상 테이블 : BL_OTT_PROD_ADJ_TGT
+                        - InsertDO : BlOttProdAdjTgtRegDO
+                        - 해당 테이블 매 작업 시, TRUNCATE 후 INSERT 됨.
+                        - 인서트 컬럼
+                            - SVC_CONT_ID
+                            - BILL_TGT_YM
+                            - CHAGE_CALC_SEQ
+                            - JOB_WRK_STTUS_CD : EX / JS / JF
+                            - OTT_DIV_CD
+                            - SVC_CONT_DIV_CD
+                            - JOB_WRK_SEQ
+                        - 유/무선 통합 조정대상 추출 DO에서 추출된 대상은 위 테이블에 INSERT됨.
+                        - 해당 테이블에 INSERT 된 대상은 다음 작업인 조정대상 작업수행 작업인 ExtractBO에서 추출되어 각각 대상별로 조정작업 수행됨.
+                        - 대상별로 작업 수행되기 위해 JOB_WRK_STTUS_CD 값이 관리되며, OTT_DIV_CD 및 SVC_CONT_DIV_CD 값도 TransformBO에서 로직 분기를 위해 관리된다.
+                - 작업취소
+                    - 결과 테이블 취소 처리
+                        - PY_ETC_ADJ_TRT_TXN : Insert된 row들 TRT_STTUS_CD = 'C' 로 업데이트 처리
+                        - BL_FUTUR_BLL_TGT_YXN / BL_MVNO_ETC_ADJ_TXN : Insert된 row들 DELETE 처리
+        - 조정대상 작업수행 기능BO 개발
+            - MfamtProdAdjTgtCretExtractBO(월정액 조정대상 생성 ExtractBO)
+                - ET 작업대상 추출 및 Trasnfrom으로 대상 전달
+                    - BlOttProdAdjTgtRetvDO(월정액상품조정대상생성조회DO)
+                    - 기능 : BL_OTT_PROD_ADJ_TGT(OTT 상품조정대상).JOB_WRK_STTUS_CD 값이 'EX', 'JF'인 대상 추출
+            - MfamtProdAdjTgtCretTrasnformBO(월정액 조정대상 생성 TrasnformBO)
+                - 각 유/무선 대상은 OTT_DIV_CD / SVC_CONT_DIV_CD 별로 로직 분기처리하여 수행
+                - 각 분기 시, 메소드 파라미터는 BL_OTT_ROD_ADJ_TGT(OTT 상품조정대상) 컬럼을 파라미터로 세팅
+                    - SVC_CONT_ID, CHAGE_CALC_SEQ, BILL_TGT_YM
+                - 각 분기별 상세 로직은 MfamtPRodAdjTgtCretAPBO()에서 수행됨.
+        - 신규 JO 배치 쉘 파일 생성
+            - jflow에서 실행을 위한 쉘파일 개발
+            - 쉘파일 목록
+                - OttProdAdjTgtCretJO_start.sh
+                - OttProdAdjTgtCretJO_start.sh.PRDB
+                - OttProdAdjTgtCretJO_start.sh.SIT
+                - OttProdAdjTgtCretJO_stop.sh
+                - OttProdAdjTgtCretJO_stop.sh.PRDB
+                - OttProdAdjTgtCretJO_stop.sh.SIT
+
+                
