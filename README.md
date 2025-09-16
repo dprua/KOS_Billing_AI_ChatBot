@@ -63,7 +63,7 @@ KT 빌링 과제 분석 챗봇은 신규 개발 요구사항을 분석하고, �
 
 ```
 kt-billing-chatbot/
-├── test.py                 # 메인 애플리케이션 코드
+├── chatbot.py                 # 메인 애플리케이션 코드
 ├── streamlit.sh           # 배포용 실행 스크립트
 ├── requirements.txt       # Python 패키지 의존성
 ├── .env                   # 환경변수 (로컬 개발용)
