@@ -43,7 +43,7 @@ KT 빌링 과제 분석 챗봇은 신규 개발 요구사항을 분석하고, �
 ## 🛠️ 기술 스택
 
 ### Backend
-- **Python 3.8+**
+- **Python 3.13**
 - **Streamlit** - 웹 인터페이스
 - **Azure OpenAI** - GPT-4o-mini, Text-Embedding-3-Small
 - **Azure AI Search** - 벡터 검색 엔진
