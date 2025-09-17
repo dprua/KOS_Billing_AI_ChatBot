@@ -240,11 +240,6 @@ logging.basicConfig(level=logging.INFO)
 - HTTPS를 통한 안전한 데이터 전송
 - 민감한 정보는 Azure Key Vault 사용 권장
 
-## 📈 성능 최적화
-
-- 임베딩 캐싱을 통한 응답 시간 개선
-- 청크 크기 최적화를 통한 검색 정확도 향상
-- Azure AI Search의 인덱싱 전략 최적화
 
 ## 🤝 기여 방법
 
@@ -258,10 +253,3 @@ logging.basicConfig(level=logging.INFO)
 
 이 프로젝트는 MIT 라이선스를 따릅니다. 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
 
-## 📞 지원
-
-문제가 발생하거나 질문이 있으시면 이슈를 등록해 주세요.
-
----
-
-🎉 **KT 빌링 과제 분석 챗봇**으로 더 효율적인 프로젝트 분석을 경험해보세요!
