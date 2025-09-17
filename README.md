@@ -14,12 +14,18 @@ KT 빌링 과제 분석 챗봇은 신규 개발 요구사항을 분석하고, �
 - AI 기반 기능 요구사항 도출
 - 과거 유사 프로젝트와의 비교 분석
 - 개발 방향성 및 참고사항 제시
+- 화면 이미지
+<img width="1567" height="911" alt="image" src="https://github.com/user-attachments/assets/64317cfc-2027-4b5d-b143-69eeff4cb114" />
+
 
 ### 2. 문서 업로드 및 관리
 - 다양한 형식의 문서 업로드 지원예정..[현재는 CSV 파일만 업로드 가능] (TXT, PDF, DOCX, CSV)
 - 프로젝트 유형별 메타데이터 관리
 - 자동 텍스트 추출 및 청킹
 - Azure Blob Storage를 통한 안전한 문서 저장
+- 화면 이미지
+<img width="1611" height="729" alt="image" src="https://github.com/user-attachments/assets/0d5e6f8b-4128-4140-b682-ef327382f7df" />
+
 
 ### 3. 지능형 검색
 - 벡터 기반 유사도 검색
